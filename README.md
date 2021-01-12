@@ -9,24 +9,36 @@ The module is tested and compatible with Terraform v12.0 (it was not tested with
 
 This module is supposed to provision/configure:
 
-- one defualt vpc
-- one defualt private subnet for web server itself
-- several public subnets ( correlates with number of AZs in the particular region)
+- one defualt vpc which also allows further growth (/16 CIDR)
+- one defualt private subnet for web server itself (/24 CIDR)
+- several public subnets ( correlates with number of AZs in the particular region) (each /24 CIDR)
 - one internet gateway
 - one elastic ip for the NAT
 - one NAT
 - two route tables: one for public subnets the other for private
-- two security groups: one applies to application load balancer the other to any web server instance
-- an application load balancer (recieves traffic over HTTP and forwards it to web server over HTTP)
-- ec2 instances based on scaling parameters
+- two security groups: one applies to application load balancer the other one to any web server instance
+- an application load balancer (recieves traffic over HTTP and forwards it to web server over HTTP); the alb is located in a public subnet
+- one auto scaling group which takes care of scaling web servers
+- ec2 instances based on scaling parameters; each located in a private subnet
+- one launch template to provision one or more ec2 instances
+
 
 # Module warnings
 
 - No HTTPS only HTTP (!IMPORTANT: do not use this web server for any sensetive content)
 - No Hight Avalaiabilty (web server instance is scaled only in single AZ; but the load balancer is highly avaliable)
-- Module is possible to run in region where there is more than on AZ (as at least two AZ are desired for the load balancer)
+- Module is possible to run in a region where there is more than one AZ (as at least two AZ are desired for the load balancer)
 - Currently it is not possible to provision nginx web server (to be tested to find a root cause)
 
+# Other design details
+
+- The end users can access the web server only through the load balancer by provided URL
+- The data on the web server are encrepted (each instance contains two encrepted devices: one for root and the other for all log storage)
+
+
+# Security groups
+
+# Web server launch template
 
 # How to run
 
