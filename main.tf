@@ -35,7 +35,6 @@ module "deploy_webserver_module" {
     scale_threshold = 70.0
 }
 
-
 output "web_server_url" {
   value = module.deploy_webserver_module.alb_hostname
 }
