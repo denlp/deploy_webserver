@@ -1,4 +1,4 @@
-# deploy_webserver
+# deploy_webserver_module
 
 This Terraform module helps to deploy a web server into AWS
 
