@@ -24,7 +24,7 @@ This module is supposed to provision/configure:
 
 # Other design details
 
-- The end users can access the web server only through the load balancer by provided URL
+- The end users can access the web server only through the load balancer via provided URL
 - The data on the web server are encrepted (each instance contains two encrepted devices: one for root and the other for all log storage)
 - Web server instances are scalled based on the CPU load (the CPU threshold for scaling can be input)
 - ALB (application load balancer) security group allows inbound HTTP traffic and outbound HTTP traffic to the public subnet (to be able to forward trafic to the web server itself)
