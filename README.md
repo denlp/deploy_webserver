@@ -22,6 +22,15 @@ This module is supposed to provision/configure:
 - ec2 instances based on scaling parameters; each located in a private subnet
 - one launch template to provision one or more ec2 instances
 
+# Other design details
+
+- The end users can access the web server only through the load balancer by provided URL
+- The data on the web server are encrepted (each instance contains two encrepted devices: one for root and the other for all log storage)
+- Web server instances are scalled based on the CPU load (the CPU threshold for scaling can be input)
+- ALB (application load balancer) security group allows inbound HTTP traffic and outbound HTTP traffic to the public subnet (to be able to forward trafic to the web server itself)
+- ASG (auto scaling group) security group allows inbound HTTP (from ALB) and SSH (admin connect) traffic from all the public subnets within VPC and outbound HTTP(S) traffic to any destination (for the matter of updates etc.)
+- Instance launch template contains a boot script which: create /var/log mount and installing the web server
+
 
 # Module warnings
 
@@ -30,15 +39,6 @@ This module is supposed to provision/configure:
 - Module is possible to run in a region where there is more than one AZ (as at least two AZ are desired for the load balancer)
 - Currently it is not possible to provision nginx web server (to be tested to find a root cause)
 
-# Other design details
-
-- The end users can access the web server only through the load balancer by provided URL
-- The data on the web server are encrepted (each instance contains two encrepted devices: one for root and the other for all log storage)
-
-
-# Security groups
-
-# Web server launch template
 
 # How to run
 
