@@ -27,7 +27,7 @@ This module is supposed to provision/configure:
 - The end users can access the web server only through the load balancer via provided URL
 - The data on the web server are encrypted (each instance contains two encrypted devices: one for root and the other for all log storage)
 - Web server instances are scaled based on the CPU load (the CPU threshold for scaling can be input)
-- ALB (application load balancer) security group allows inbound HTTP traffic and outbound HTTP traffic to the public subnet (to be able to forward traffic to the web server itself)
+- ALB (application load balancer) security group allows inbound HTTP traffic and outbound HTTP traffic to the private subnet (to be able to forward traffic to the web server itself)
 - ASG (auto scaling group) security group allows inbound HTTP (from ALB) and SSH (admin connect) traffic from all the public subnets within VPC and outbound HTTP(S) traffic to any destination (for the matter of updates etc.)
 - Instance launch template contains a boot script which: create /var/log mount and installing the web server
 
