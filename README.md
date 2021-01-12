@@ -55,7 +55,9 @@ To run the module you should refer to it and input your desired values (also see
 - log_mount_size: size of device which will be mounted to /var/log/ (in GB)
 - scale_threshold: percentage of CPU load which triggers scaling out
 
-After provisioning check terraform output for details like web server URL
+There are these module outputs avaliable:
+
+- alb_hostname: returns the value of URL on which end user can access it
 
 # TO-DO 
 
