@@ -40,6 +40,6 @@ else
 fi
 
 yum update -y
-yum install -y httpd
-systemctl start httpd
-systemctl enable httpd
+yum install -y ${web_server}
+systemctl start ${web_server}
+systemctl enable ${web_server}

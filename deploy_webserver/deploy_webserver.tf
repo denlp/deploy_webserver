@@ -412,12 +412,59 @@ resource "aws_launch_template" "lt_web_server_ec2" {
 
   #user_data = filebase64("${path.module}/scripts/init-httpd.sh")
   #user_data = "${base64encode(data.template_file.user_data.rendered)}"
-  user_data = base64encode("${templatefile("./deploy_webserver/scripts/init-httpd.sh", {mount_device = "${var.log_mount_device}", mount_path = "/var/log/"})}")
+  user_data = base64encode("${templatefile("./deploy_webserver/scripts/init-httpd.sh", {web_server="${var.deploy_type}", mount_device = "${var.log_mount_device}", mount_path = "/var/log/"})}")
   
 
   depends_on = [aws_security_group.asg_sg, aws_subnet.private_subnet]
 }
 
+###
+#Creating autoscaling group and attaching launching template
+###
+resource "aws_autoscaling_group" "lt_web_server_ec2" {
+  name = "ec2_web_server_${var.deploy_name}_${var.deploy_type}_lt"
+  max_size = "${var.asg_instance_max_size}"
+  min_size = "${var.asg_instance_min_size}"
+  health_check_grace_period = 300
+  health_check_type = "ELB"
+  desired_capacity = "${var.asg_instance_desired_size}"
+  force_delete  = true
+  vpc_zone_identifier = [aws_subnet.private_subnet.0.id] 
+
+  launch_template {
+    id  = aws_launch_template.lt_web_server_ec2.id
+    version = "$Latest"
+  }
+
+  depends_on = [aws_launch_template.lt_web_server_ec2, aws_subnet.private_subnet]
+}
+
+
+###
+#Attaching application load balancer to autoscaling group
+###
+resource "aws_autoscaling_attachment" "asg_attachment" {
+  autoscaling_group_name = aws_autoscaling_group.lt_web_server_ec2.id
+  alb_target_group_arn   = aws_lb_target_group.web_server_tg.arn
+  depends_on = [aws_lb_target_group.web_server_tg, aws_autoscaling_group.lt_web_server_ec2] 
+}
+
+
+resource "aws_autoscaling_policy" "example" {
+  autoscaling_group_name = aws_autoscaling_group.lt_web_server_ec2.name
+  name = "${var.deploy_name}_${var.deploy_type}_asg_policy"
+  policy_type = "TargetTrackingScaling"
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "${var.scale_threshold_type}"
+    }
+    target_value = "${var.scale_threshold}"
+  }
+}
+
+output "alb_hostname" {
+  value = aws_lb.alb.dns_name
+}
 
 
 
