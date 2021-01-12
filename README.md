@@ -15,7 +15,7 @@ This module is supposed to provision/configure:
 - one internet gateway
 - one elastic ip for the NAT
 - one NAT
-- two route tables: one for public subnets the other for private
+- two route tables: one for public subnets the other for private subnet
 - two security groups: one applies to application load balancer the other one to any web server instance
 - an application load balancer (recieves traffic over HTTP and forwards it to web server over HTTP); the alb is located in a public subnet
 - one auto scaling group which takes care of scaling web servers
@@ -32,12 +32,14 @@ This module is supposed to provision/configure:
 - Instance launch template contains a boot script which: create /var/log mount and installing the web server
 
 
-# Module warnings
+# Module flaws
 
-- No HTTPS only HTTP (!IMPORTANT: do not use this web server for any sensetive content)
+- No HTTPS support for module, only HTTP (!IMPORTANT: do not use this web server for any sensetive content)
 - No Hight Avalaiabilty (web server instance is scaled only in single AZ; but the load balancer is highly avaliable)
 - Module is possible to run in a region where there is more than one AZ (as at least two AZ are desired for the load balancer)
-- Currently it is not possible to provision nginx web server (to be tested to find a root cause)
+- Currently it is not possible to provision nginx web server (to be tested to find the root cause)
+- No web server monitoring and alarming
+- No access to administrate web server and its configs as the web servers are in private subnet
 
 
 # How to run
@@ -57,4 +59,11 @@ After provisioning check terraform output for details like web server URL
 
 # TO-DO 
 
-- 
+Here is the list of suggestions of how to resolve/mitigate module flows:
+
+- Increaseang logs: provision s3, in instance bootstart script install and configure logrotate to rotate logs when reaching specific size, as posrotate send archived logs to s3 and remove it from filesystem
+- High Avaliability zone: create private subnet per avaliable AZ, and set allow ASG for more AZ/subnets
+- Generate random string for deployment name in case it is not supplyied
+- Enable HTTPS support for the module: provison certificate via ACM for the ALB hostname and automate its approval (include for_each block which is supported from Terraform 12.17), update ALB listener to accept HTTPS traffic and place the certifiacate on ALB (HTTPS would terminate on the load balancer) + adjust security group to allow HTTPS inbound traffic
+- Application monitoring/alarming: with AWS CloudWatch monitor and notify about web server erros in log
+- Admin access to web server: ?? on web server provide key pair on provisioning, on the web server configure specific httpd/nginx user which will be able to adjust httpd/nginx configs and restart the web server to apply configs, configure bastion ec2 instance  which would force ssh redirect to the desired web server, set access to bastion instance with AIM Role ???
